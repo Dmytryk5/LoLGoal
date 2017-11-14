@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="spinner_server_options">
+        <item>EUW</item>
+        <item>RU</item>
+        <item>EUNE</item>
+        <item>NA</item>
+        <item>OCE</item>
+        <item>BR</item>
+        <item>LAN</item>
+        <item>LAS</item>
+        <item>TR</item>
+        <item>JP</item>
+        <item>PBE</item>
+    </string-array>
+</resources>

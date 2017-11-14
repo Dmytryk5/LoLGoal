@@ -1,0 +1,9 @@
+<resources>
+    <string name="temporary_lol_api_key">RGAPI-375afae4-446f-471c-a4a0-062bc86be6c3</string>
+    <string name="app_name">LoL Goal</string>
+    <string name="search">Search Game</string>
+    <string name="summoner_name">Summoner name</string>
+    <string name="action_settings">Settings</string>
+    <string name="search_statistics">Search statistics</string>
+    <string name="temporary_result_container">Temporary result container</string>
+</resources>
