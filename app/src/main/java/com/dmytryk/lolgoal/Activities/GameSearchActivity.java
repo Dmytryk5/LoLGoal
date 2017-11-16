@@ -1,14 +1,11 @@
 package com.dmytryk.lolgoal.Activities;
 
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.InputFilter;
-import android.text.Spanned;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,15 +29,15 @@ import okhttp3.Response;
 
 public class GameSearchActivity extends AppCompatActivity {
 
-    EditText editTextSummonerName;
-    Spinner spinnerServerOptions;
-    Button buttonSearchGame;
-    Button buttonSearchStatistics;
+    private EditText editTextSummonerName;
+    private Spinner spinnerServerOptions;
+    private Button buttonSearchGame;
+    private Button buttonSearchStatistics;
 
-    TextView textViewTemp;
+    private TextView textViewTemp;
 
-    OkHttpClient httpClient = new OkHttpClient();
-    String summonerName;
+    private final OkHttpClient httpClient = new OkHttpClient();
+    private String summonerName;
 
     private final Pattern summonerNameValidationPattern =
             Pattern.compile("^[0-9\\\\p{L} _\\\\.]+$");
@@ -80,7 +77,7 @@ public class GameSearchActivity extends AppCompatActivity {
 
                     httpClient.newCall(request).enqueue(new Callback() {
                         @Override
-                        public void onFailure(Call call, IOException e) {
+                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
 
                             final String failureMessage = e.getMessage();
 
@@ -94,7 +91,7 @@ public class GameSearchActivity extends AppCompatActivity {
                         }
 
                         @Override
-                        public void onResponse(Call call, Response response) throws IOException {
+                        public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                             if (!response.isSuccessful()){
 
                                 final String unsuccessfulResponse = response.toString();
@@ -133,8 +130,8 @@ public class GameSearchActivity extends AppCompatActivity {
 
                 else {
                     Toast.makeText(GameSearchActivity.this,
-                            "Summoner name is invalid", Toast.LENGTH_LONG);
-                    // make edittext red
+                            "Summoner name is invalid", Toast.LENGTH_LONG).show();
+                    // make editText red
                 }
             }
         });
@@ -203,13 +200,10 @@ public class GameSearchActivity extends AppCompatActivity {
 
     private boolean checkUserInput() {
         summonerName = editTextSummonerName.getText().toString();
-        if (summonerName != null && summonerName != "") {
+        if (!summonerName.equals("")) {
             Matcher summonerNameValidationMatcher =
                     summonerNameValidationPattern.matcher(summonerName);
-            if (summonerNameValidationMatcher.matches())
-                return true;
-            else
-                return false;
+            return summonerNameValidationMatcher.matches();
         }
         else return false;
     }
@@ -241,7 +235,7 @@ public class GameSearchActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
 
             //FIXME make real menu options
-            Toast.makeText(this, "Ну нажав ти сюда і шо?",Toast.LENGTH_LONG);
+            Toast.makeText(this, "Ну нажав ти сюда і шо?",Toast.LENGTH_LONG).show();
             return true;
         }
 
