@@ -125,7 +125,7 @@ public class GameSearchActivity extends AppCompatActivity {
                                     }
                                 });
 
-                                textViewTemp.setText("SUCCESS! " + response);
+                                textViewTemp.setText("CODE SUCCESS! " + response);
                             }
                         }
                     });
