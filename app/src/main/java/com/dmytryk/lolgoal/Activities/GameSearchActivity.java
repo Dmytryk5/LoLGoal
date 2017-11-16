@@ -6,6 +6,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,6 +17,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dmytryk.lolgoal.R;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.regex.Matcher;
@@ -39,8 +43,12 @@ public class GameSearchActivity extends AppCompatActivity {
     private final OkHttpClient httpClient = new OkHttpClient();
     private String summonerName;
 
-    private final Pattern summonerNameValidationPattern =
-            Pattern.compile("^[0-9\\\\p{L} _\\\\.]+$");
+    private String JSONTAG = "JSON_DEBUG";
+    private String HTTPTAG = "HTTP_DEBUG";
+    private String DEBUGTAG = "DEBUG";
+
+//    private final Pattern summonerNameValidationPattern =
+//            Pattern.compile("^[0-9\\\\p{L} _\\\\.]+$");
 
 
     @Override
@@ -93,6 +101,10 @@ public class GameSearchActivity extends AppCompatActivity {
                         @Override
                         public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                             if (!response.isSuccessful()){
+                                // todo switch by response codes explanation
+//                                switch (response.code()){
+//                                    case 400:
+//                                }
 
                                 final String unsuccessfulResponse = response.toString();
 
@@ -102,10 +114,11 @@ public class GameSearchActivity extends AppCompatActivity {
                                         try {
                                             textViewTemp.setText("UNSUCCESSFUL! "
                                                     + unsuccessfulResponse);
+
                                             throw new IOException("Unexpected code "
                                                     + unsuccessfulResponse);
                                         } catch (IOException e){
-                                            e.printStackTrace();
+                                            Log.d(HTTPTAG, e.getMessage());
                                         }
                                     }
                                 });
@@ -113,16 +126,36 @@ public class GameSearchActivity extends AppCompatActivity {
 
                             else {
 
-                                final String successfulResponse = response.body().string();
+                                final String successfulResponseJSON = response.body().string();
+                                String tmpSummonerData = "";
+                                try {
+                                    JSONObject jsonObject = new JSONObject(successfulResponseJSON);
+                                    String summonerName = jsonObject.getString("name");
+                                    long summonerId = jsonObject.getLong("id");
+                                    long summonerLevel = jsonObject.getLong("summonerLevel");
+                                    int profileIconId = jsonObject.getInt("profileIconId");
+                                    tmpSummonerData = "Summoner name : " + summonerName +
+                                            " Summoner level : " + summonerLevel +
+                                            " Profile icon ID : " + profileIconId +
+                                            " Summoner ID : " + summonerId;
+
+                                } catch (JSONException jsonException){
+                                    tmpSummonerData = "JSON exception: "
+                                            + jsonException.getMessage();
+                                    Log.d(JSONTAG, "JSON Exception: "
+                                            + jsonException.getMessage());
+                                }
+
+                                final String tmpResultingString = tmpSummonerData;
 
                                 GameSearchActivity.this.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        textViewTemp.setText(successfulResponse);
+                                        textViewTemp.setText(tmpResultingString);
                                     }
                                 });
 
-                                textViewTemp.setText("CODE SUCCESS! " + response);
+//                                textViewTemp.setText("CODE SUCCESS! " + response);
                             }
                         }
                     });
@@ -194,18 +227,16 @@ public class GameSearchActivity extends AppCompatActivity {
                 + summonerName + "?api_key="
                 + getResources().getString(R.string.temporary_lol_api_key);
 
+        Log.d(HTTPTAG, "Request URL is " + requestURL);
+
         return requestURL;
 
     }
 
     private boolean checkUserInput() {
         summonerName = editTextSummonerName.getText().toString();
-        if (!summonerName.equals("")) {
-            Matcher summonerNameValidationMatcher =
-                    summonerNameValidationPattern.matcher(summonerName);
-            return summonerNameValidationMatcher.matches();
-        }
-        else return false;
+        Log.d(DEBUGTAG, "Summoner name is " + summonerName);
+        return  !summonerName.equals("");
     }
 
 

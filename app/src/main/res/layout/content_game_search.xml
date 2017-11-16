@@ -17,6 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="70dp"
+            android:digits="0123456789qwertzuiopasdfghjklyxcvbnm_. "
             android:id="@+id/et_summoner_name"
             android:hint="@string/summoner_name" />
 
