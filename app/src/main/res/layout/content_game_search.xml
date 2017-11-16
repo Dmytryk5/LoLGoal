@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.dmytryk.lolgoal.Activities.GameSearchActivity"
+    tools:context="com.dmytryk.lolgoal.all.Activities.GameSearchActivity"
     tools:showIn="@layout/activity_game_search">
 
     <LinearLayout

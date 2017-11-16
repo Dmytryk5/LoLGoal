@@ -1,4 +1,4 @@
-package com.dmytryk.lolgoal.Activities;
+package com.dmytryk.lolgoal.all.Activities;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -17,13 +17,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dmytryk.lolgoal.R;
+import com.dmytryk.lolgoal.all.Entities.Summoner;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -127,26 +126,31 @@ public class GameSearchActivity extends AppCompatActivity {
                             else {
 
                                 final String successfulResponseJSON = response.body().string();
-                                String tmpSummonerData = "";
+//                                String tmpSummonerData = "";
+                                Summoner requestedSummoner = null;
                                 try {
                                     JSONObject jsonObject = new JSONObject(successfulResponseJSON);
                                     String summonerName = jsonObject.getString("name");
                                     long summonerId = jsonObject.getLong("id");
                                     long summonerLevel = jsonObject.getLong("summonerLevel");
                                     int profileIconId = jsonObject.getInt("profileIconId");
-                                    tmpSummonerData = "Summoner name : " + summonerName +
-                                            " Summoner level : " + summonerLevel +
-                                            " Profile icon ID : " + profileIconId +
-                                            " Summoner ID : " + summonerId;
+                                    long accountId = jsonObject.getLong("accountId");
+                                    long revisionDate = jsonObject.getLong("revisionDate");
+                                    requestedSummoner = new Summoner(summonerName, profileIconId,
+                                            summonerLevel, revisionDate, summonerId, accountId);
 
                                 } catch (JSONException jsonException){
-                                    tmpSummonerData = "JSON exception: "
-                                            + jsonException.getMessage();
                                     Log.d(JSONTAG, "JSON Exception: "
                                             + jsonException.getMessage());
                                 }
 
-                                final String tmpResultingString = tmpSummonerData;
+
+                                final String tmpResultingString;
+                                if (requestedSummoner != null) {
+                                    tmpResultingString = requestedSummoner.readableToString();
+                                } else {
+                                    tmpResultingString = "Error while parsing";
+                                }
 
                                 GameSearchActivity.this.runOnUiThread(new Runnable() {
                                     @Override
