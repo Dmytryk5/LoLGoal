@@ -41,6 +41,9 @@ public class GameSearchActivity extends AppCompatActivity {
 
     private final OkHttpClient httpClient = new OkHttpClient();
     private String summonerName;
+    private String hostRegionalEndpoint;
+
+//    private Summoner summoner = null;
 
     private String JSONTAG = "JSON_DEBUG";
     private String HTTPTAG = "HTTP_DEBUG";
@@ -74,97 +77,242 @@ public class GameSearchActivity extends AppCompatActivity {
 
     }
 
+
+    private void makeGameSearchRequest(){
+
+        final String URL = formSummonerNameRequest(summonerName);
+        Request request = new Request.Builder().url(URL).build();
+
+        httpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                requestFailureExplanation(e);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response)
+                    throws IOException {
+                if (!response.isSuccessful()) {
+                    unsuccessfulSummonerNameRequestExplanation(response);
+
+                } else {
+
+                    Summoner summoner = successfulSummonerNameRequest(response);
+
+                    //after summonerId is available search of the match begins
+                    makeSpectatorRequest(summoner);
+                }
+            }
+        });
+
+    }
+
+    private Summoner successfulSummonerNameRequest(Response response) throws IOException {
+
+        final String successfulResponseJSON;
+
+        successfulResponseJSON = response.body().string();
+
+//                                String tmpSummonerData = "";
+        Summoner requestedSummoner = createSummonerFromJSON(successfulResponseJSON);
+        //create summoner info
+        displaySummonerInfo();
+
+
+        final String tmpResultingString;
+        if (requestedSummoner != null) {
+            tmpResultingString = requestedSummoner.readableToString();
+        } else {
+            tmpResultingString = "Error while parsing";
+        }
+
+        //!! temporary
+        GameSearchActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                textViewTemp.setText(tmpResultingString);
+            }
+        });
+
+        return requestedSummoner;
+
+
+    }
+
+    private void displaySummonerInfo() {
+
+    }
+
+    private Summoner createSummonerFromJSON(String successfulResponseJSON) {
+        try {
+            JSONObject jsonObject = new JSONObject(successfulResponseJSON);
+            String summonerName = jsonObject.getString("name");
+            long summonerId = jsonObject.getLong("id");
+            long summonerLevel = jsonObject.getLong("summonerLevel");
+            int profileIconId = jsonObject.getInt("profileIconId");
+            long accountId = jsonObject.getLong("accountId");
+            long revisionDate = jsonObject.getLong("revisionDate");
+            return new Summoner(summonerName, profileIconId,
+                    summonerLevel, revisionDate, summonerId, accountId);
+//                                    summoner = requestedSummoner;
+
+        } catch (JSONException jsonException) {
+            Log.d(JSONTAG, "JSON Exception: "
+                    + jsonException.getMessage());
+            return null;
+        }
+
+    }
+
+    private void unsuccessfulSummonerNameRequestExplanation(Response response) {
+        // todo switch by response codes explanation
+//                                switch (response.code()){
+//                                    case 400:
+//                                }
+
+        final String unsuccessfulResponse = response.toString();
+
+        GameSearchActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    textViewTemp.setText("UNSUCCESSFUL! "
+                            + unsuccessfulResponse);
+
+                    throw new IOException("Unexpected code "
+                            + unsuccessfulResponse);
+                } catch (IOException e) {
+                    Log.d(HTTPTAG, e.getMessage());
+                }
+            }
+        });
+
+    }
+
+    private void requestFailureExplanation(@NonNull IOException e) {
+        final String failureMessage = e.getMessage();
+
+
+        Log.d(HTTPTAG, "Fail. " + e.getMessage());
+
+        GameSearchActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                textViewTemp.setText("FAIL! " + failureMessage);
+            }
+        });
+
+
+    }
+
+    private void makeSpectatorRequest(Summoner summoner) {
+
+        if (summoner != null) {
+            String spectatorURL = formSpectatorRequest(
+                    summoner.getId());
+
+            Log.d(HTTPTAG, "Requesting spectator URL :" + spectatorURL);
+
+            Request spectatorRequest = new Request.Builder()
+                    .url(spectatorURL).build();
+
+                    httpClient.newCall(spectatorRequest).enqueue(new Callback() {
+
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            requestFailureExplanation(e);
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response)
+                                throws IOException {
+                            if(!response.isSuccessful()){
+                                unsuccessfulSpectatorExplanation(response);
+                            } else {
+                                try {
+                                    handleSuccessfulSpectatorResponse(response);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    });
+//
+//                }
+//
+////                                textViewTemp.setText("CODE SUCCESS! " + response);
+//            }
+//        }
+//        });
+        }
+    }
+
+    private void handleSuccessfulSpectatorResponse(Response response) throws IOException {
+
+        final String responseBody = response.body().string();
+        Log.d(JSONTAG, responseBody);
+
+
+
+        GameSearchActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                textViewTemp.setText(responseBody);
+
+            }
+        });
+
+
+
+
+
+    }
+
+    private void unsuccessfulSpectatorExplanation(final Response response) {
+        if (response.code() == 404){
+            Log.d(DEBUGTAG,
+                    "Request was successful but summoner is not currently in game (404)");
+            GameSearchActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        textViewTemp.setText("Summoner is not currently in game.");
+
+                        throw new IOException("Unexpected code "
+                                + response.body().string());
+
+                    } catch (IOException e) {
+                        Log.d(HTTPTAG, e.getMessage());
+                    }
+                }
+            });
+        } else {
+            GameSearchActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        textViewTemp.setText("UNSUCCESSFUL! "
+                                + response.code());
+
+                        throw new IOException("Unexpected code "
+                                + response.body().string());
+
+                    } catch (IOException e) {
+                        Log.d(HTTPTAG, e.getMessage());
+                    }
+                }
+            });
+        }
+    }
+
     private void setOnClickListeners() {
         buttonSearchGame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (checkUserInput()){
-                    final String URL = formSummonerNameRequest();
-                    Request request = new Request.Builder().url(URL).build();
-
-                    httpClient.newCall(request).enqueue(new Callback() {
-                        @Override
-                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
-                            final String failureMessage = e.getMessage();
-
-                            GameSearchActivity.this.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    textViewTemp.setText("FAIL! " + failureMessage);
-                                }
-                            });
-
-                        }
-
-                        @Override
-                        public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                            if (!response.isSuccessful()){
-                                // todo switch by response codes explanation
-//                                switch (response.code()){
-//                                    case 400:
-//                                }
-
-                                final String unsuccessfulResponse = response.toString();
-
-                                GameSearchActivity.this.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            textViewTemp.setText("UNSUCCESSFUL! "
-                                                    + unsuccessfulResponse);
-
-                                            throw new IOException("Unexpected code "
-                                                    + unsuccessfulResponse);
-                                        } catch (IOException e){
-                                            Log.d(HTTPTAG, e.getMessage());
-                                        }
-                                    }
-                                });
-                            }
-
-                            else {
-
-                                final String successfulResponseJSON = response.body().string();
-//                                String tmpSummonerData = "";
-                                Summoner requestedSummoner = null;
-                                try {
-                                    JSONObject jsonObject = new JSONObject(successfulResponseJSON);
-                                    String summonerName = jsonObject.getString("name");
-                                    long summonerId = jsonObject.getLong("id");
-                                    long summonerLevel = jsonObject.getLong("summonerLevel");
-                                    int profileIconId = jsonObject.getInt("profileIconId");
-                                    long accountId = jsonObject.getLong("accountId");
-                                    long revisionDate = jsonObject.getLong("revisionDate");
-                                    requestedSummoner = new Summoner(summonerName, profileIconId,
-                                            summonerLevel, revisionDate, summonerId, accountId);
-
-                                } catch (JSONException jsonException){
-                                    Log.d(JSONTAG, "JSON Exception: "
-                                            + jsonException.getMessage());
-                                }
-
-
-                                final String tmpResultingString;
-                                if (requestedSummoner != null) {
-                                    tmpResultingString = requestedSummoner.readableToString();
-                                } else {
-                                    tmpResultingString = "Error while parsing";
-                                }
-
-                                GameSearchActivity.this.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        textViewTemp.setText(tmpResultingString);
-                                    }
-                                });
-
-//                                textViewTemp.setText("CODE SUCCESS! " + response);
-                            }
-                        }
-                    });
+                    makeGameSearchRequest();
                 }
-
                 else {
                     Toast.makeText(GameSearchActivity.this,
                             "Summoner name is invalid", Toast.LENGTH_LONG).show();
@@ -182,13 +330,26 @@ public class GameSearchActivity extends AppCompatActivity {
 
     }
 
+    /** When summonerId is available we can search for summoners current match
+     *
+     * @return URL for spectator request
+     */
+    private String formSpectatorRequest(long summonerId) {
+
+        return "https://" + hostRegionalEndpoint + "/lol/spectator/v3/active-games/by-summoner/"
+                + summonerId + "?api_key="
+                + getResources().getString(R.string.temporary_lol_api_key);
+    }
+
     /**
      *  In order to get summoner current match information
      *  first we need to know summoner`s account id
+     *
+     *  @return URL for summoner name
      */
-    private String formSummonerNameRequest() {
+    private String formSummonerNameRequest(String summonerName) {
         String host;
-        switch (spinnerServerOptions.getSelectedItemPosition()){
+        switch (spinnerServerOptions.getSelectedItemPosition()) {
             case 0:
                 host = "euw1.api.riotgames.com";
                 break;
@@ -223,9 +384,11 @@ public class GameSearchActivity extends AppCompatActivity {
                 host = "pbe1.api.riotgames.com";
                 break;
             default:
-                host ="euw1.api.riotgames.com";
+                host = "euw1.api.riotgames.com";
                 break;
         }
+
+        hostRegionalEndpoint = host;
 
         String requestURL = "https://" + host + "/lol/summoner/v3/summoners/by-name/"
                 + summonerName + "?api_key="
