@@ -1,7 +1,7 @@
 package com.dmytryk.lolgoal.all.Entities;
 
 /**
- * Created by dmytryk on 28.11.17.
+ * Current game participant consists of summoner, champion and game info
  */
 
 public class CurrentGameParticipant {
@@ -9,6 +9,13 @@ public class CurrentGameParticipant {
     private Summoner summoner;
     private Champion champion;
     private Boolean isBot = false;
+    private long profileIconId;
+    //customization
+    //perks
+    private long summonerSpellOnD;
+    private long summonerSpellOnF;
+    private long teamId;
+
 
     CurrentGameParticipant(Summoner summoner, Champion champion, Boolean bot){
         this.summoner = summoner;

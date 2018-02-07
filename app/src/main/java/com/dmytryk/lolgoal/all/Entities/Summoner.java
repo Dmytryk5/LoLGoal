@@ -13,6 +13,7 @@ public class Summoner {
     private long id;
     private long accountId;
 
+
     public Summoner(String name, int profileIconId, long summonerLevel, long revisionDate,
                     long id, long accountId) {
         this.name = name;

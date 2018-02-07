@@ -1,9 +1,5 @@
 package com.dmytryk.lolgoal.all.Entities;
 
-/**
- * Created by dmytryk on 28.11.17.
- */
-
 public class BannedChampion extends Champion {
 
     int pickTurn;

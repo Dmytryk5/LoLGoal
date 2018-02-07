@@ -1,7 +1,7 @@
 package com.dmytryk.lolgoal.all.Entities;
 
 /**
- * Created by dmytryk on 28.11.17.
+ * Ingame Champion
  */
 
 public class Champion {
