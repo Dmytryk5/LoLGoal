@@ -20,9 +20,9 @@ public class CurrentGame {
     String platformId;
     String gameMod;
     String gameType;
-    String encryptionKey;
     boolean isBuilt = false;
     //observers with encryption key
+    //customization objects
 
     CurrentGame(ArrayList<CurrentGameParticipant> participants,
                 ArrayList<BannedChampion> bannedChampions,
@@ -30,7 +30,7 @@ public class CurrentGame {
                 long mapId, long gameLength,
                 long gameQueueConfigId,
                 String platformId, String gameMod,
-                String gameType, String encryptionKey) {
+                String gameType) {
         this.participants = participants;
         this.bannedChampions = bannedChampions;
         this.gameId = gameId;
@@ -41,7 +41,6 @@ public class CurrentGame {
         this.platformId = platformId;
         this.gameMod = gameMod;
         this.gameType = gameType;
-        this.encryptionKey = encryptionKey;
         this.isBuilt = true;
     }
 

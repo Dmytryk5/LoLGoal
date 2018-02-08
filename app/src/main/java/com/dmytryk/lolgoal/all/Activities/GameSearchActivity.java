@@ -2,6 +2,7 @@ package com.dmytryk.lolgoal.all.Activities;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -17,12 +18,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dmytryk.lolgoal.R;
+import com.dmytryk.lolgoal.all.Entities.BannedChampion;
+import com.dmytryk.lolgoal.all.Entities.CurrentGame;
+import com.dmytryk.lolgoal.all.Entities.CurrentGameBuilder;
+import com.dmytryk.lolgoal.all.Entities.CurrentGameParticipant;
+import com.dmytryk.lolgoal.all.Entities.Perk;
 import com.dmytryk.lolgoal.all.Entities.Summoner;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -43,8 +51,6 @@ public class GameSearchActivity extends AppCompatActivity {
     private String summonerName;
     private String hostRegionalEndpoint;
 
-//    private Summoner summoner = null;
-
     private String JSONTAG = "JSON_DEBUG";
     private String HTTPTAG = "HTTP_DEBUG";
     private String DEBUGTAG = "DEBUG";
@@ -63,6 +69,7 @@ public class GameSearchActivity extends AppCompatActivity {
         initUI();
         setOnClickListeners();
 
+        //TODO FAB repeats last request
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -152,7 +159,7 @@ public class GameSearchActivity extends AppCompatActivity {
             int profileIconId = jsonObject.getInt("profileIconId");
             long accountId = jsonObject.getLong("accountId");
             long revisionDate = jsonObject.getLong("revisionDate");
-            return new Summoner(summonerName, profileIconId,
+            return  Summoner.getCompleteSummonerInstance(summonerName, profileIconId,
                     summonerLevel, revisionDate, summonerId, accountId);
 //                                    summoner = requestedSummoner;
 
@@ -252,6 +259,17 @@ public class GameSearchActivity extends AppCompatActivity {
         final String responseBody = response.body().string();
         Log.d(JSONTAG, responseBody);
 
+        CurrentGame game = createCurrentGameFromJSON(responseBody);
+
+        if (game != null){
+
+        }
+        else {
+
+        }
+
+
+
 
 
         GameSearchActivity.this.runOnUiThread(new Runnable() {
@@ -268,6 +286,83 @@ public class GameSearchActivity extends AppCompatActivity {
 
 
     }
+
+
+    @Nullable
+    private CurrentGame createCurrentGameFromJSON(String successfulResponse) {
+
+        try {
+            JSONObject JSONResponse = new JSONObject(successfulResponse);
+            long gameId = JSONResponse.getLong("gameId");
+            long gameStartTime = JSONResponse.getLong("gameStartTime");
+            String platform = JSONResponse.getString("platform");
+            String gameMode = JSONResponse.getString("gameMode");
+            long mapId = JSONResponse.getLong("mapId");
+            String gameType = JSONResponse.getString("gameType");
+            long gameLength = JSONResponse.getLong("gameLength");
+            long gameQueueConfigId = JSONResponse.getLong("gameQueueConfigId");
+
+
+            JSONArray participantsJSONArray = JSONResponse.getJSONArray("participants");
+
+            ArrayList<CurrentGameParticipant> participants = new ArrayList<>(10);
+            for (int i = 0; i < participantsJSONArray.length(); i++){
+                CurrentGameParticipant currentGameParticipant;
+                currentGameParticipant =
+                        parseParticipantArray(participantsJSONArray.getJSONObject(i));
+                participants.add(currentGameParticipant);
+            }
+
+            JSONArray bannedChampsJSONArray = JSONResponse.getJSONArray("bannedChampions");
+            ArrayList<BannedChampion> bannedChampions = new ArrayList<>(10);
+            for (int i = 0; i < bannedChampsJSONArray.length(); i++){
+
+                JSONObject currentBannedChampionJSONObject = bannedChampsJSONArray.getJSONObject(i);
+                long championId = currentBannedChampionJSONObject.getLong("championId");
+                long teamId = currentBannedChampionJSONObject.getLong("teamId");
+                int pickTurn = currentBannedChampionJSONObject.getInt("pickTurn");
+
+                bannedChampions.add(new BannedChampion(championId, pickTurn, teamId));
+
+            }
+
+            //builder instantiate currentgame
+
+
+
+
+        }catch (JSONException jse){
+            Log.d(JSONTAG, jse.getMessage());
+        }
+
+
+        //fixme replace null!!!
+        return null;
+    }
+
+    private CurrentGameParticipant parseParticipantArray(JSONObject jobject) throws JSONException {
+//        JSONObject jobject = (JSONObject) o;//is this legit?
+        long profileIcon = jobject.getLong("profileIcon");
+        long championId = jobject.getLong("championId");
+        String summonerName = jobject.getString("summonerName");
+        boolean isBot = jobject.getBoolean("bot");
+        //perks
+
+        JSONObject perks = jobject.getJSONObject("perks");
+
+        Perk perk = Perk.createPerkFromJson(perks);
+
+        long spellOnF = jobject.getLong("spell2Id");
+        long teamId = jobject.getLong("teamId");
+        long spellOnD = jobject.getLong("spell1Id");
+        long summonerId = jobject.getLong("summonerId");
+
+        Summoner summoner = Summoner.getShortenedSummonerInstance(summonerName, summonerId);
+
+        return new CurrentGameParticipant(summoner, championId, isBot, profileIcon, spellOnD,
+                spellOnF, perk, teamId);
+    }
+
 
     private void unsuccessfulSpectatorExplanation(final Response response) {
         if (response.code() == 404){

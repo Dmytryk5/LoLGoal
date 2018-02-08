@@ -7,14 +7,29 @@ package com.dmytryk.lolgoal.all.Entities;
 public class Summoner {
 
     private String name;
-    private int profileIconId;
+    private long profileIconId;
     private long summonerLevel;
     private long revisionDate;
     private long id;
     private long accountId;
+    private boolean isFull;
 
+    public static Summoner getCompleteSummonerInstance(String name, long profileIconId,
+                                                       long summonerLevel, long revisionDate,
+                                                       long id, long accountId) {
+        return new Summoner(name, profileIconId, summonerLevel, revisionDate,
+                id, accountId);
+    }
 
-    public Summoner(String name, int profileIconId, long summonerLevel, long revisionDate,
+    public static Summoner getShortenedSummonerInstance(String name, long id) {
+        return new Summoner(name, id);
+    }
+
+    public static Summoner getShortenedSummonerInstance(String name, long id, long profileIconId) {
+        return new Summoner(name, id, profileIconId);
+    }
+
+    private Summoner(String name, long profileIconId, long summonerLevel, long revisionDate,
                     long id, long accountId) {
         this.name = name;
         this.profileIconId = profileIconId;
@@ -22,6 +37,29 @@ public class Summoner {
         this.revisionDate = revisionDate;
         this.id = id;
         this.accountId = accountId;
+        isFull = true;
+    }
+    
+    private Summoner(String name, long summonerId){
+        this.name = name;
+        this.id = summonerId;
+        isFull = false;
+    }
+
+    private Summoner(String name, long summonerId, long profileIcon){
+        this.name = name;
+        this.id = summonerId;
+        this.profileIconId = profileIcon;
+        isFull = false;
+    }
+
+    public void makeSummonerComplete(){
+        if (isFull){
+            return;
+        }
+        else {
+            //todo request by name to fill all fields
+        }
     }
 
     @Override
@@ -39,22 +77,12 @@ public class Summoner {
         return name.equals(summoner.name);
     }
 
-    @Override
-    public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + profileIconId;
-        result = 31 * result + (int) (summonerLevel ^ (summonerLevel >>> 32));
-        result = 31 * result + (int) (revisionDate ^ (revisionDate >>> 32));
-        result = 31 * result + (int) (id ^ (id >>> 32));
-        result = 31 * result + (int) (accountId ^ (accountId >>> 32));
-        return result;
-    }
 
     public String getName() {
         return name;
     }
 
-    public int getProfileIconId() {
+    public long getProfileIconId() {
         return profileIconId;
     }
 

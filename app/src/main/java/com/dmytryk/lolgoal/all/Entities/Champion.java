@@ -6,7 +6,7 @@ package com.dmytryk.lolgoal.all.Entities;
 
 public class Champion {
     protected long championId;
-    protected String name;
+    protected String name = "";
 
     public Champion(String name, long championId){
         this.name = name;
@@ -16,4 +16,6 @@ public class Champion {
     public Champion(long championId){
         this.championId = championId;
     }
+
+
 }

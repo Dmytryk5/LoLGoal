@@ -13,7 +13,7 @@ public class CurrentGameBuilder {
     private String platformId;
     private String gameMod;
     private String gameType;
-    private String encryptionKey;
+
 
     public CurrentGameBuilder setParticipants(ArrayList<CurrentGameParticipant> participants) {
         this.participants = participants;
@@ -65,13 +65,10 @@ public class CurrentGameBuilder {
         return this;
     }
 
-    public CurrentGameBuilder setEncryptionKey(String encryptionKey) {
-        this.encryptionKey = encryptionKey;
-        return this;
-    }
+
 
     public CurrentGame createCurrentGame() {
         return new CurrentGame(participants, bannedChampions, gameId, gameStartTime, mapId,
-                gameLength, gameQueueConfigId, platformId, gameMod, gameType, encryptionKey);
+                gameLength, gameQueueConfigId, platformId, gameMod, gameType);
     }
 }
