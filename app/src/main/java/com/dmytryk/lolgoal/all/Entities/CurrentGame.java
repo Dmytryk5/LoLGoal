@@ -8,6 +8,8 @@ import java.util.ArrayList;
  */
 
 public class CurrentGame {
+
+
     ArrayList<CurrentGameParticipant> participants = null;
     ArrayList<BannedChampion> bannedChampions = null;
 
@@ -45,7 +47,21 @@ public class CurrentGame {
     }
 
 
-
+    @Override
+    public String toString() {
+        return "CurrentGame{" +
+                "participants=" + participants +
+                ", bannedChampions=" + bannedChampions +
+                ", gameId=" + gameId +
+                ", gameStartTime=" + gameStartTime +
+                ", mapId=" + mapId +
+                ", gameLength=" + gameLength +
+                ", gameQueueConfigId=" + gameQueueConfigId +
+                ", platformId='" + platformId + '\'' +
+                ", gameMod='" + gameMod + '\'' +
+                ", gameType='" + gameType + '\'' +
+                '}';
+    }
 
 
 

@@ -11,4 +11,5 @@ public class BannedChampion extends Champion {
         this.teamId = teamId;
     }
 
+
 }

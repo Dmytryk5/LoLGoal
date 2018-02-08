@@ -111,4 +111,17 @@ public class Summoner {
                 " Profile icon ID : " + profileIconId +
                 " Summoner ID : " + id;
     }
+
+
+    @Override
+    public String toString() {
+        return "Summoner{" +
+                "name='" + name + '\'' +
+                ", profileIconId=" + profileIconId +
+                ", summonerLevel=" + summonerLevel +
+                ", revisionDate=" + revisionDate +
+                ", id=" + id +
+                ", accountId=" + accountId +
+                '}';
+    }
 }

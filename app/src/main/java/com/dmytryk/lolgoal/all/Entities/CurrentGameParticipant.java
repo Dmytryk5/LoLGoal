@@ -56,4 +56,18 @@ public class CurrentGameParticipant {
         return isBot;
     }
 
+    @Override
+    public String toString() {
+        return "CurrentGameParticipant{" +
+                "summoner=" + summoner +
+                ", champion=" + champion +
+                ", championId=" + championId +
+                ", isBot=" + isBot +
+                ", profileIconId=" + profileIconId +
+                ", perk=" + perk +
+                ", summonerSpellOnD=" + summonerSpellOnD +
+                ", summonerSpellOnF=" + summonerSpellOnF +
+                ", teamId=" + teamId +
+                '}';
+    }
 }

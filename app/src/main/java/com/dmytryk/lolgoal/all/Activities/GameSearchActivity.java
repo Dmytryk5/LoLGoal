@@ -262,28 +262,36 @@ public class GameSearchActivity extends AppCompatActivity {
         CurrentGame game = createCurrentGameFromJSON(responseBody);
 
         if (game != null){
+            updateUIWithGameInfo(game);
 
         }
         else {
+            updateUIWithErrorExplained();
 
         }
 
 
 
+//
+//
+//        GameSearchActivity.this.runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//                textViewTemp.setText(responseBody);
+//
+//            }
+//        });
 
 
-        GameSearchActivity.this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
 
-                textViewTemp.setText(responseBody);
+    }
 
-            }
-        });
+    private void updateUIWithErrorExplained() {
 
+    }
 
-
-
+    private void updateUIWithGameInfo(CurrentGame game) {
 
     }
 
@@ -328,15 +336,24 @@ public class GameSearchActivity extends AppCompatActivity {
 
             //builder instantiate currentgame
 
+            CurrentGameBuilder builder = new CurrentGameBuilder();
+            CurrentGame currentGame = builder.setGameId(gameId)
+                    .setBannedChampions(bannedChampions).setGameLength(gameLength)
+                    .setGameMod(gameMode).setGameQueueConfigId(gameQueueConfigId)
+                    .setGameStartTime(gameStartTime).setGameType(gameType).setMapId(mapId)
+                    .setParticipants(participants).setPlatformId(platform).createCurrentGame();
 
+
+            Log.d(HTTPTAG, "RESPONSE : \n" + currentGame.toString());
+
+            return currentGame;
 
 
         }catch (JSONException jse){
             Log.d(JSONTAG, jse.getMessage());
         }
 
-
-        //fixme replace null!!!
+        //if game wasnt created
         return null;
     }
 
