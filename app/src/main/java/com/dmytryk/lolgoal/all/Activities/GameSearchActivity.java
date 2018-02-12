@@ -150,6 +150,7 @@ public class GameSearchActivity extends AppCompatActivity {
 
     }
 
+    @Nullable
     private Summoner createSummonerFromJSON(String successfulResponseJSON) {
         try {
             JSONObject jsonObject = new JSONObject(successfulResponseJSON);
@@ -304,7 +305,7 @@ public class GameSearchActivity extends AppCompatActivity {
             JSONObject JSONResponse = new JSONObject(successfulResponse);
             long gameId = JSONResponse.getLong("gameId");
             long gameStartTime = JSONResponse.getLong("gameStartTime");
-            String platform = JSONResponse.getString("platform");
+            String platform = JSONResponse.getString("platformId");
             String gameMode = JSONResponse.getString("gameMode");
             long mapId = JSONResponse.getLong("mapId");
             String gameType = JSONResponse.getString("gameType");
@@ -352,6 +353,7 @@ public class GameSearchActivity extends AppCompatActivity {
 
         }catch (JSONException jse){
             Log.d(JSONTAG, jse.getMessage());
+            //todo check if json is viable
         }
 
         //if game wasnt created
@@ -360,7 +362,7 @@ public class GameSearchActivity extends AppCompatActivity {
 
     private CurrentGameParticipant parseParticipantArray(JSONObject jobject) throws JSONException {
 //        JSONObject jobject = (JSONObject) o;//is this legit?
-        long profileIcon = jobject.getLong("profileIcon");
+        long profileIcon = jobject.getLong("profileIconId");
         long championId = jobject.getLong("championId");
         String summonerName = jobject.getString("summonerName");
         boolean isBot = jobject.getBoolean("bot");
