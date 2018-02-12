@@ -159,6 +159,7 @@ public class GameSearchActivity extends AppCompatActivity {
             int profileIconId = jsonObject.getInt("profileIconId");
             long accountId = jsonObject.getLong("accountId");
             long revisionDate = jsonObject.getLong("revisionDate");
+            Log.d(JSONTAG, summonerName + summonerId);
             return  Summoner.getCompleteSummonerInstance(summonerName, profileIconId,
                     summonerLevel, revisionDate, summonerId, accountId);
 //                                    summoner = requestedSummoner;
@@ -172,7 +173,7 @@ public class GameSearchActivity extends AppCompatActivity {
     }
 
     private void unsuccessfulSummonerNameRequestExplanation(Response response) {
-        // todo switch by response codes explanation
+        // switch by response codes explanation
 //                                switch (response.code()){
 //                                    case 400:
 //                                }
@@ -183,7 +184,7 @@ public class GameSearchActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    textViewTemp.setText("UNSUCCESSFUL! "
+                    textViewTemp.setText("UNSUCCESSFUL! (summoner name request failure) "
                             + unsuccessfulResponse);
 
                     throw new IOException("Unexpected code "
@@ -200,7 +201,7 @@ public class GameSearchActivity extends AppCompatActivity {
         final String failureMessage = e.getMessage();
 
 
-        Log.d(HTTPTAG, "Fail. " + e.getMessage());
+        Log.d(HTTPTAG, " Request Fail. " + e.getMessage());
 
         GameSearchActivity.this.runOnUiThread(new Runnable() {
             @Override
@@ -252,6 +253,9 @@ public class GameSearchActivity extends AppCompatActivity {
 //        }
 //        });
         }
+        else {
+            Log.d(HTTPTAG, "summoner object is null. request canceled");
+        }
     }
 
     private void handleSuccessfulSpectatorResponse(Response response) throws IOException {
@@ -271,27 +275,24 @@ public class GameSearchActivity extends AppCompatActivity {
         }
 
 
-
-//
-//
-//        GameSearchActivity.this.runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//                textViewTemp.setText(responseBody);
-//
-//            }
-//        });
-
-
-
     }
 
     private void updateUIWithErrorExplained() {
 
     }
 
-    private void updateUIWithGameInfo(CurrentGame game) {
+    private void updateUIWithGameInfo(final CurrentGame game) {
+
+
+        GameSearchActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                textViewTemp.setText(game.toString());
+
+            }
+        });
+
 
     }
 
@@ -448,18 +449,12 @@ public class GameSearchActivity extends AppCompatActivity {
      */
     private String formSpectatorRequest(long summonerId) {
 
-        return "https://" + hostRegionalEndpoint + "/lol/spectator/v3/active-games/by-summoner/"
+        return "https://" + getHostRegionalEndpoint() + "/lol/spectator/v3/active-games/by-summoner/"
                 + summonerId + "?api_key="
                 + getResources().getString(R.string.temporary_lol_api_key);
     }
 
-    /**
-     *  In order to get summoner current match information
-     *  first we need to know summoner`s account id
-     *
-     *  @return URL for summoner name
-     */
-    private String formSummonerNameRequest(String summonerName) {
+    private String getHostRegionalEndpoint(){
         String host;
         switch (spinnerServerOptions.getSelectedItemPosition()) {
             case 0:
@@ -501,6 +496,19 @@ public class GameSearchActivity extends AppCompatActivity {
         }
 
         hostRegionalEndpoint = host;
+        return host;
+
+    }
+
+    /**
+     *  In order to get summoner current match information
+     *  first we need to know summoner`s account id
+     *
+     *  @return URL for summoner name
+     */
+    private String formSummonerNameRequest(String summonerName) {
+
+        String host = getHostRegionalEndpoint();
 
         String requestURL = "https://" + host + "/lol/summoner/v3/summoners/by-name/"
                 + summonerName + "?api_key="
